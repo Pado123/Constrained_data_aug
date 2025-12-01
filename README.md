@@ -244,15 +244,12 @@ If you use this framework in your research, please cite:
 "Augmentation of Event Logs under User-Defined Process Constraints"
 ```
 
-## License
-
-[Specify license if applicable]
-
 ## Contact
-
-[Add contact information if needed]
+alessandro.padella@unipd.it
 
 ## Acknowledgments
+Alesasndro Padella
+Letizia Cimbro
 
 - Built using [pm4py](https://pm4py.fit.fraunhofer.de/) for process mining
 - Uses [automata-lib](https://github.com/caleb531/automata) for NFA operations
