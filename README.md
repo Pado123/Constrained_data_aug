@@ -2,6 +2,8 @@
 
 This repository contains the implementation of a **Constraint-based Event Log Generation Framework** described in the thesis "Augmentation of Event Logs under User-Defined Process Constraints". The framework generates synthetic event logs that conform to declarative process constraints while preserving statistical properties of the original logs.
 
+Additional constraints are provided in the Extended_version.pdf file
+
 ## Overview
 
 The framework enables the generation of synthetic event logs that:
@@ -256,5 +258,3 @@ If you use this framework in your research, please cite:
 - Uses [automata-lib](https://github.com/caleb531/automata) for NFA operations
 
 ---
-
-**Note:** Data files and simulation results are available separately at the [Google Drive link](https://drive.google.com/drive/folders/1i6dlmlvRnXmL00meEVy9674uX8Z3uZ-t?usp=sharing) mentioned above.
