@@ -206,12 +206,6 @@ The framework has been tested on multiple real-world event logs:
 ### Our Approach k=∞: Filtered Log Generation
 - Generates sequences directly from constraint-filtered log
 
-### Scenario D: With Data Attributes
-- Includes data attribute generation based on log statistics
-
-### Scenario E: With Resource Constraints
-- Includes resource allocation and calendar-based constraints
-
 ## Results and Outputs
 
 ### Simulation Logs
