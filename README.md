@@ -15,7 +15,7 @@ Scenario D -> S-∞FSA
 pip install -r requirements.txt   #
 ```
 
-Place event logs under `data/` 
+Place event logs under `data/` folder, after creating it
 
 ## Main pieces
 
