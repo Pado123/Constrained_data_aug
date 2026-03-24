@@ -10,19 +10,15 @@ warnings.filterwarnings('ignore')
 # CHANGE THESE PARAMETERS AND COMMENT/UNCOMMMENT IN constraints_per_log.py
 
 case_studies = [
-    # 'Purchasing',
-    'Production',
-    # 'Consulta',
-    # 'bpi12',
-    # 'bpi12a',
-    # 'bpi12o',
-    # 'bpi17',
-    # 'bpi17o',
-    # 'hospital'
-    ]
+    'ds02',
+    'ds03',
+    'ds01',
+    'bpi12',
+    'bpi17',
+]
 
-N_SIM = 1
-exp = ' exp10' 
+# N_SIM = 1000000000000
+# exp = ' exp10' 
 
 
 def print_time(execution_time, outpath):
@@ -75,33 +71,32 @@ if __name__ == '__main__':
                 label_data_attributes=[ "MonthlyCost",  "OfferedAmount",]
                 k = 3
               
-            if case_study == 'hospital':
-                path_log = 'data/hospital/hospital_pp_res.xes'
-                save_split_to = 'data/hospital'
-                save_simulations_to = 'simulations/hospital'
-                label_data_attributes=[ "ETA_ACCESSO", "COLORE_TRIAGE", "ACCESSO_TRIAGE"]
-                k = 3  
-            
-
-            if case_study == 'Consulta':
-                path_log = 'data/Consulta/ConsultaDataMining201618.xes'
-                save_split_to = 'data/Consulta' 
-                save_simulations_to = 'simulations/Consulta'
-                label_data_attributes=[]
+            if case_study == 'ds06':
+                path_log = 'data/ds06/log.xes'
+                save_split_to = 'data/ds06'
+                save_simulations_to = 'simulations/ds06'
+                label_data_attributes = ['ATTR_WAIT_TIME', 'ATTR_URGENCY', 'ATTR_ARRIVAL_MODE']
                 k = 3
 
-            if case_study == 'Production':
-                path_log = 'data/Production/production.xes'
-                save_split_to = 'data/Production'
-                save_simulations_to = 'simulations/Production'
-                label_data_attributes=['Work Order  Qty', 'Part Desc.', 'Report Type', 'Qty Completed', 'Qty Rejected', 'Qty for MRB', 'Rework']
+            if case_study == 'ds01':
+                path_log = 'data/ds01/log.xes'
+                save_split_to = 'data/ds01'
+                save_simulations_to = 'simulations/ds01'
+                label_data_attributes = []
                 k = 3
 
-            if case_study == 'Purchasing':
-                path_log = 'data/Purchasing/PurchasingExample.xes'
-                save_split_to = 'data/Purchasing'
-                save_simulations_to = 'simulations/Purchasing'
-                label_data_attributes=[]
+            if case_study == 'ds03':
+                path_log = 'data/ds03/log.xes'
+                save_split_to = 'data/ds03'
+                save_simulations_to = 'simulations/ds03'
+                label_data_attributes = ['ATTR_1', 'ATTR_2', 'ATTR_3', 'ATTR_4', 'ATTR_5', 'ATTR_6', 'ATTR_7']
+                k = 3
+
+            if case_study == 'ds02':
+                path_log = 'data/ds02/log.xes'
+                save_split_to = 'data/ds02'
+                save_simulations_to = 'simulations/ds02'
+                label_data_attributes = []
                 k = 3
             
             
@@ -136,67 +131,67 @@ if __name__ == '__main__':
             # ######################
             # ##### SCENARIO B #####
             # ######################            
-            # start_time = time.time() 
-            # outpath_B = f'results/{save_simulations_to}{exp}/scenarioB'  
-            # os.makedirs(outpath_B, exist_ok=True) 
-            # print('\n*********************************\nSCENARIO B\n*********************************')
-            # generator = EventLogGenerator(train_log, k=-1, label_data_attributes=label_data_attributes, 
-            #                                 case_study=case_study, scenario='scenarioB')
-            # for i in range(N_SIM):
-            #     simulated_traces = generator.sample_traces(N=len(test_log))
-            #     simulated_traces.to_csv(outpath_B + f'/sim_{i}.csv', index=False)
-            #     print(f'{case_study} simulation {i} with SCENARIO B done!')
-            # end_time = time.time()
-            # execution_time = end_time - start_time + preprocessing_time
-            # print_time(execution_time, outpath_B)
+            start_time = time.time() 
+            outpath_B = f'results/{save_simulations_to}{exp}/scenarioB'  
+            os.makedirs(outpath_B, exist_ok=True) 
+            print('\n*********************************\nSCENARIO B\n*********************************')
+            generator = EventLogGenerator(train_log, k=50, label_data_attributes=label_data_attributes, 
+                                            case_study=case_study, scenario='scenarioB')
+            for i in range(N_SIM):
+                simulated_traces = generator.sample_traces(N=len(test_log))
+                simulated_traces.to_csv(outpath_B + f'/sim_{i}.csv', index=False)
+                print(f'{case_study} simulation {i} with SCENARIO B done!')
+            end_time = time.time()
+            execution_time = end_time - start_time + preprocessing_time
+            print_time(execution_time, outpath_B)
             
             # ######################
             # ##### SCENARIO C #####
             # ######################
-            # start_time = time.time()      
-            # outpath_C = f'results/{save_simulations_to}{exp}/scenarioC'
-            # os.makedirs(outpath_C, exist_ok=True)
-            # print('\n*********************************\nSCENARIO C\n*********************************')
-            # generator = EventLogGenerator(train_log, k=k, label_data_attributes=label_data_attributes, 
-            #                                 case_study=case_study, scenario='scenarioC')
-            # for i in range(N_SIM):
-            #     simulated_traces = generator.apply(N=len(test_log), start_timestamp = start_timestamp)
-            #     simulated_traces.to_csv(outpath_C + f'/sim_{i}.csv', index=False)
-            #     print(f'{case_study} simulation {i} with SCENARIO C done!')
-            # end_time = time.time()
-            # execution_time = end_time - start_time + preprocessing_time
-            # print_time(execution_time, outpath_C)
+            start_time = time.time()      
+            outpath_C = f'results/{save_simulations_to}{exp}/scenarioC'
+            os.makedirs(outpath_C, exist_ok=True)
+            print('\n*********************************\nSCENARIO C\n*********************************')
+            generator = EventLogGenerator(train_log, k=k, label_data_attributes=label_data_attributes, 
+                                            case_study=case_study, scenario='scenarioC')
+            for i in range(N_SIM):
+                simulated_traces = generator.apply(N=len(test_log), start_timestamp = start_timestamp)
+                simulated_traces.to_csv(outpath_C + f'/sim_{i}.csv', index=False)
+                print(f'{case_study} simulation {i} with SCENARIO C done!')
+            end_time = time.time()
+            execution_time = end_time - start_time + preprocessing_time
+            print_time(execution_time, outpath_C)
             
             # ######################
             # ##### SCENARIO D #####
             # ######################    
-            # start_time = time.time()              
-            # outpath_D = f'results/{save_simulations_to}{exp}/scenarioD'
-            # os.makedirs(outpath_D, exist_ok=True)     
-            # print('\n*********************************\nSCENARIO D\n*********************************')
-            # generator = EventLogGenerator(train_log, k=k, label_data_attributes=label_data_attributes, 
-            #                                 case_study=case_study, scenario='scenarioD')
-            # for i in range(N_SIM):
-            #     simulated_traces = generator.apply(N=len(test_log), start_timestamp = start_timestamp)
-            #     simulated_traces.to_csv(outpath_D + f'/sim_{i}.csv', index=False)
-            #     print(f'{case_study} simulation {i} with SCENARIO D done!')
-            # end_time = time.time()
-            # execution_time = end_time - start_time + preprocessing_time
-            # print_time(execution_time, outpath_D)
+            start_time = time.time()              
+            outpath_D = f'results/{save_simulations_to}{exp}/scenarioD'
+            os.makedirs(outpath_D, exist_ok=True)     
+            print('\n*********************************\nSCENARIO D\n*********************************')
+            generator = EventLogGenerator(train_log, k=k, label_data_attributes=label_data_attributes, 
+                                            case_study=case_study, scenario='scenarioD')
+            for i in range(N_SIM):
+                simulated_traces = generator.apply(N=len(test_log), start_timestamp = start_timestamp)
+                simulated_traces.to_csv(outpath_D + f'/sim_{i}.csv', index=False)
+                print(f'{case_study} simulation {i} with SCENARIO D done!')
+            end_time = time.time()
+            execution_time = end_time - start_time + preprocessing_time
+            print_time(execution_time, outpath_D)
 
             # ######################
             # ##### SCENARIO E #####
             # ######################
-            # start_time = time.time() 
-            # outpath_E= f'results/{save_simulations_to}{exp}/scenarioE'
-            # os.makedirs(outpath_E, exist_ok=True)
-            # print('\n*********************************\nSCENARIO E\n*********************************')
-            # generator = EventLogGenerator(train_log, k=-1, label_data_attributes=label_data_attributes, 
-            #                                 case_study=case_study, scenario='scenarioE')
-            # for i in range(N_SIM):
-            #     simulated_traces = generator.sample_traces(N=len(test_log))
-            #     simulated_traces.to_csv(outpath_E + f'/sim_{i}.csv', index=False)
-            #     print(f'{case_study} simulation {i} with SCENARIO E done!')
-            # end_time = time.time()
-            # execution_time = end_time - start_time + preprocessing_time
-            # print_time(execution_time, outpath_E)
+            start_time = time.time() 
+            outpath_E= f'results/{save_simulations_to}{exp}/scenarioE'
+            os.makedirs(outpath_E, exist_ok=True)
+            print('\n*********************************\nSCENARIO E\n*********************************')
+            generator = EventLogGenerator(train_log, k=50, label_data_attributes=label_data_attributes, 
+                                            case_study=case_study, scenario='scenarioE')
+            for i in range(N_SIM):
+                simulated_traces = generator.sample_traces(N=len(test_log))
+                simulated_traces.to_csv(outpath_E + f'/sim_{i}.csv', index=False)
+                print(f'{case_study} simulation {i} with SCENARIO E done!')
+            end_time = time.time()
+            execution_time = end_time - start_time + preprocessing_time
+            print_time(execution_time, outpath_E)

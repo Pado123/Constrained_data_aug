@@ -42,7 +42,8 @@ def build_automaton_from_ts(ts_dict: dict, alphabet: list, k: int) -> NFA:
                 if prefix == (START_PLACEHOLDER,):
                     next_state = (act,)
                 else:
-                    if len(prefix) < k:
+                    # k < 0 means infinite context: never truncate
+                    if k < 0 or len(prefix) < k:
                         next_state = prefix + (act,)
                     else:
                         next_state = prefix[1:] + (act,)

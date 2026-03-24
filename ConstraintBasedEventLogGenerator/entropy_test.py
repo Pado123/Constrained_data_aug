@@ -45,7 +45,7 @@ def summary_stats(values):
         "ci_t_high": ci_t_high
     }
 
-log_names = ["purchasing", "production", "consulta", "bpi12", "bpi12a", "bpi12o", "bpi17", "bpi17o", "hospital"]
+log_names = ["ds02", "ds03", "ds01", "bpi12", "bpi12a", "bpi12o", "bpi17", "bpi17o", "ds06"]
 scenarios = ["A", "B", "C", "D", "E"]
 N_SIM = 10
 
@@ -57,7 +57,7 @@ os.makedirs(f'{path}/entropies', exist_ok=True)
 for log_name in log_names:
     rows = []
 
-    if log_name in ['purchasing', 'production', 'consulta', 'bpi12', 'bpi17', 'hospital']:
+    if log_name in ['ds02', 'ds03', 'ds01', 'bpi12', 'bpi17', 'ds06']:
         experiments = ["exp1", "exp2", "exp3", "exp4",]
     elif log_name in ['bpi12a']:
         experiments = ["exp1", "exp2", "exp3"]

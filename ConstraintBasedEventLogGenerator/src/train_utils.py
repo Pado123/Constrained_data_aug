@@ -17,7 +17,7 @@ def splitEventLog(log, train_size=0.7, split_temporal=True, save_to=''):
     if split_temporal:
         sorted_case_ids = sorted(trace_dict.keys(), key=lambda cid: trace_dict[cid]['time:timestamp'].min())
     else:
-        np.random.seed(72)
+        np.random.seed(1618)
         sorted_case_ids = list(trace_dict.keys())
         np.random.shuffle(sorted_case_ids)
 

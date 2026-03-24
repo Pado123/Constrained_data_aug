@@ -13,6 +13,25 @@ from constraints.utils_ts import extract_event_seqs_and_alphabet
 from constraints.constants import START_PLACEHOLDER, END_PLACEHOLDER
 from constraints.framework_constraints import get_filtered_log, get_prefix_proba_constrained
 
+
+def _normalize_case_study_name(case_study: str) -> str:
+    """
+    Normalize external case-study labels to framework constraint keys.
+    """
+    if not case_study:
+        return case_study
+    aliases = {
+        "hospital": "ds06",
+        "hospital_italy": "ds06",
+        "Consulta": "ds01",
+        "Purchasing": "ds02",
+        "Production": "ds03",
+        "lending": "ds04",
+        "cvs": "ds05",
+    }
+    return aliases.get(case_study, case_study)
+
+
 class EventLogGenerator:
     def __init__(self, log, k, label_data_attributes=[], case_study:str ='', scenario: str = ''):
 
@@ -26,39 +45,46 @@ class EventLogGenerator:
         
         self.label_data_attributes = label_data_attributes
 
-        self.case_study = case_study
+        self.case_study = _normalize_case_study_name(case_study)
         self.scenario = scenario
         
         event_seqs, self.alphabet  = extract_event_seqs_and_alphabet(self.log)   
         
         if scenario == 'scenarioA':
             self.alphabet_pruned, self.prefixes_proba_next_state = get_prefix_proba_constrained(
-                self.case_study, self.alphabet, event_seqs, self.k)
+                self.case_study, self.alphabet, event_seqs, self.k, log=self.log)
 
         elif scenario in ['scenarioB', 'scenarioE']:
+            # Scenario B: same constraints structure as A (alphabet + pruning) but with k=∞
             if scenario == 'scenarioB':
-                self.log = get_filtered_log(self.log, self.case_study, self.alphabet)
-
-            if label_data_attributes:
-                self.trace_attribute_labels = get_trace_attribute_labels(self.log, self.label_data_attributes)
-                self.event_attributes_labels = list(set(self.label_data_attributes) - set(self.trace_attribute_labels))
-            return
+                self.alphabet_pruned, self.prefixes_proba_next_state = get_prefix_proba_constrained(
+                    self.case_study, self.alphabet, event_seqs, self.k, log=self.log)
+            # elif scenario == 'scenarioE':
+            #     self.log = get_filtered_log(self.log, self.case_study, self.alphabet)
+            #     if label_data_attributes:
+            #         self.trace_attribute_labels = get_trace_attribute_labels(self.log, self.label_data_attributes)
+            #         self.event_attributes_labels = list(set(self.label_data_attributes) - set(self.trace_attribute_labels))
+            #     return
 
         elif scenario in ['scenarioC', 'scenarioD']:
             if scenario == 'scenarioC':
-                self.log = get_filtered_log(self.log, self.case_study, self.alphabet)
+                self.log = get_filtered_log(
+                    self.log, self.case_study, self.alphabet,
+                    event_seqs=event_seqs, k=self.k,
+                )
 
             self.prefixes_proba_next_act = get_prefix_proba(self.log, self.k)
 
-
-        self.prefixes_proba_next_res = get_prefix_res_proba(self.log, k)
+        # k < 0 means infinite context; use large k for prefix-window utilities
+        k_eff = self.k if self.k > 0 else 10**6
+        self.prefixes_proba_next_res = get_prefix_res_proba(self.log, k_eff)
 
         if label_data_attributes:
             self.trace_attribute_labels = get_trace_attribute_labels(self.log, self.label_data_attributes)
             self.event_attributes_labels = list(set(self.label_data_attributes) - set(self.trace_attribute_labels))
 
             self.prob_trace_attributes = get_trace_attribute_proba(self.log, self.trace_attribute_labels)
-            self.prefixes_proba_next_attr = get_prefix_attr_proba(self.log, self.event_attributes_labels, k)
+            self.prefixes_proba_next_attr = get_prefix_attr_proba(self.log, self.event_attributes_labels, k_eff)
 
         # calendars discovery
         self.arrival_calendar = discover_arrival_calendar(self.log)
@@ -127,7 +153,7 @@ class EventLogGenerator:
 
         """
         
-        if self.scenario == 'scenarioA':
+        if self.scenario in ['scenarioA', 'scenarioB']:
             gen_seq_log = self.generate_seq_constrained(N_seq)
         else:
             possible_prefixes = list(self.prefixes_proba_next_act.keys())
@@ -234,40 +260,14 @@ class EventLogGenerator:
 
     def apply(self, N, start_timestamp):
 
-        # start_timestamp = datetime.strptime(start_timestamp, "%Y-%m-%d %H:%M:%S")
-
         print('Generate sequences...')
         log_seq = self.generate_seq(N)
-        print('Generate resources...')
-        log_seq_res = self.generate_resources(log_seq)
-        if getattr(self, "trace_attribute_labels", []):
-            print('Generate attributes...')
-            trace_attributes = random.choices(list(self.prob_trace_attributes.keys()), weights=self.prob_trace_attributes.values(), k=N)
-            log_seq = self.generate_attributes(log_seq, log_seq_res)
-        else:
-            log_seq = log_seq_res
-
-        print('Generate timestamps...')
-        timestamps_log = self.generate_timestamps(log_seq, start_timestamp)
-
-        ids = [str(i) for i in range(1, len(log_seq)+1) for _ in range(len(log_seq[i-1]))]
-        activities = [ev[0] for trace in log_seq for ev in trace]
-        roles = [ev[1] for trace in log_seq for ev in trace]
-        if self.label_data_attributes:
-            attributes_dict = {l: [] for l in self.label_data_attributes}
-            for i, l in enumerate(self.event_attributes_labels):
-                attributes_dict[l] = [ev[2][i] for trace in log_seq for ev in trace]
-            for k, l in enumerate(self.trace_attribute_labels):
-                for i in range(len(trace_attributes)):
-                    for _ in range(len(log_seq[i])):
-                        attributes_dict[l].append(trace_attributes[i][k])
-        else:
-            attributes_dict = dict()
-        timestamps = [t for trace in timestamps_log for t in trace]
-        
-        df = pd.DataFrame({'case:concept:name': ids, 'concept:name': activities, 'time:timestamp': timestamps, 'org:resource': roles} | attributes_dict)
-        df = self.generate_lifecyle(df)
-
+        # Sequence-only mode: skip resources, attributes, and timestamps generation.
+        ids = [str(i) for i in range(1, len(log_seq) + 1) for _ in range(len(log_seq[i - 1]))]
+        activities = [act for trace in log_seq for act in trace]
+        df = pd.DataFrame({"case:concept:name": ids, "concept:name": activities})
+        df["concept:name"] = df["concept:name"].str.replace("_lc:start", "", regex=False)
+        df["concept:name"] = df["concept:name"].str.replace("_lc:complete", "", regex=False)
         return df
     
     
@@ -289,25 +289,12 @@ class EventLogGenerator:
                 row["case:concept:name"] = str(new_case_id+1)  # nuovo case ID
                 rows.append(row)
 
-        columns_to_keep = [
-            'case:concept:name', 'concept:name', 'time:timestamp','org:resource', 
-        ] 
-        
-        trace_attrs = getattr(self, "trace_attribute_labels", [])
-        if trace_attrs:
-            columns_to_keep += trace_attrs
-        event_attrs = getattr(self, "event_attributes_labels", [])
-        if event_attrs:
-            columns_to_keep += event_attrs
-            
-        columns_to_keep.append('lifecycle:transition')
-        
+        # Sequence-only mode: keep only case id and activity.
+        columns_to_keep = ['case:concept:name', 'concept:name']
+
         df = pd.DataFrame(rows)
         df = df[columns_to_keep]
         df["concept:name"] = df["concept:name"].str.replace("_lc:start", "", regex=False)
         df["concept:name"] = df["concept:name"].str.replace("_lc:complete", "", regex=False)
-        
-        if 'lifecycle:transition' in df.columns:
-            df['lifecycle:transition'] = df['lifecycle:transition'].str.lower()
-        
+
         return df

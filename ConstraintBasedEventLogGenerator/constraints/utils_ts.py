@@ -31,7 +31,8 @@ def build_transition_system_from_log(event_seqs, k=3):
 
         full_trace = trace + [END_PLACEHOLDER]
         for i in range(len(full_trace)):
-            history = trace[max(0, i - k):i]
+            # k < 0 means infinite context: use full prefix
+            history = trace[0:i] if k < 0 else trace[max(0, i - k):i]
             if history:
                 state = tuple(history)
                 next_act = full_trace[i]

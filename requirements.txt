@@ -1,0 +1,15 @@
+# Core data processing
+numpy==1.26.4
+pandas==2.3.3
+scipy==1.17.0
+tqdm==4.66.5
+
+# Process mining
+pm4py==2.7.15.2
+
+# Automata and constraints
+automata-lib==9.1.2
+python-Levenshtein==0.27.3
+
+# Resource-based distance utilities (used in src/res_based_ced.py)
+log-distance-measures @ git+https://github.com/AutomatedProcessImprovement/log-distance-measures.git@2.1.0
