@@ -2,6 +2,8 @@
 
 This repository is the implementation of the paper *Event-Log Augmentation under User-Defined Process Constraints*. Currently under review.
 
+The full paper with the associated appendix is available at [https://anonymous.4open.science/r/Constrained_data_aug-6B86/Augmentation_of_Event_Logs_under_User_Defined_Process_Constraints-1.pdf](url)
+
 It generates synthetic event logs that satisfy declarative constraints while preserving statistical properties of a reference log. Constraints are encoded as automata and combined with transition-system–based generation; multiple scenarios (e.g. constrained vs. baseline) are supported. 
 
 Scenario A -> SC-kFSA
